@@ -59,83 +59,106 @@ app.preferences.rulerUnits = Units.PIXELS;
 //Groupe a exporter
 dataLayer = document.layerSets.getByName ("data_out");
 
-//Folder export
-var pathGlobal = "/d/BD/";
-pathGlobal += prompt ("Quel projet ?", "envol", "Export du rough...") 
-var pageIn = prompt ('Page numero : ', '000', 'Environement...')
+function exportRect() {
+    //Folder export
+    var pathGlobal = "/d/BD/";
+    projectName = prompt ("Quel projet ?", "envol", "Export du rough...") 
 
-//Path de la page
-var pathPage = pathGlobal + "/P" + pageIn + "/";
-var pathPageFolder = new Folder (pathPage);
-if(!pathPageFolder.exists) {
-    pathPageFolder.create();
-};
+    if (projectName === null){
+        return; 
+    } else {
+        pathGlobal += projectName;
+    };
 
-//Path du rough
-pathRough = pathPage + "/rough_psd/";
-var pathRoughFolder = new Folder (pathRough );
-if(!pathRoughFolder.exists) {
-    pathRoughFolder.create();
-};
+    //Path de la page
+    var pathProjectFolder = new Folder (pathGlobal);
+    while(!pathProjectFolder.exists) {
+        alert("Le projet n'existe pas !", "Attention !" );
+        pathGlobal = "/d/BD/";
+        pathGlobal += prompt ("Quel projet ?", "envol", "Export du rough...")
+        pathProjectFolder = new Folder (pathGlobal);
+    };
 
-//Path du fichier case
-//var jpgFolder = pathOutput + plancheIn + "_cases/"
-var pathCases = pathPage + "/cases/"; 
-var pathCasesFolder = new Folder (pathCases);
-if(!pathCasesFolder.exists) {
-    pathCasesFolder.create();
-}
+    //Quel page ?
+    var pageIn = prompt ('Page numero : ', '000', 'Environement...')
 
-//fichier txt DATA
-var pathData = new File(pathPage + "P" + pageIn + "_data.txt");
-pathData.open("w");
+    if(pageIn === null || pageIn === '000' ) {
+        return; 
+    };
 
-//Export des cases JPG et DATA
-var i = dataLayer.artLayers.length-1;
-var numOutput = 1 ;     //dataLayer.artLayers[i].name.split(' ').pop(); //numero de case
+    //Path de la page
+    var pathPage = pathGlobal + "/P" + pageIn + "/";
+    var pathPageFolder = new Folder (pathPage);
+    if(!pathPageFolder.exists) {
+        pathPageFolder.create();
+    };
 
-for(i ; i >= 0 ; i--) {
-    
-    var history = document.activeHistoryState; //Historique off
-        
-    var boundsOutput = dataLayer.artLayers[i].bounds; //bound de la case
-            
-    document.crop (boundsOutput);
-    
-    var numCase = String(numOutput).padStart(3, "0");
-    var pathCase = pathCases + "C" + numCase + "/";
-    var pathCaseFolder = new Folder (pathCase);
-    if(!pathCaseFolder.exists) {
-        pathCaseFolder.create();
+    //Path du rough
+    pathRough = pathPage + "/rough_psd/";
+    var pathRoughFolder = new Folder (pathRough );
+    if(!pathRoughFolder.exists) {
+        pathRoughFolder.create();
+    };
+
+    //Path du fichier case
+    //var jpgFolder = pathOutput + plancheIn + "_cases/"
+    var pathCases = pathPage + "/cases/"; 
+    var pathCasesFolder = new Folder (pathCases);
+    if(!pathCasesFolder.exists) {
+        pathCasesFolder.create();
     }
-    
-    var jpgOutput = new File(pathCase + "C" +numCase + ".jpg");
-    document.saveAs (jpgOutput, JPEGSaveOptions, true);
-     
-    x1 = String(boundsOutput[0]).replace (" px", "");
-    y1 = String(boundsOutput[1]).replace (" px", "");
-    x2 = String(boundsOutput[2]).replace (" px", "");
-    y2 = String(boundsOutput[3]).replace (" px", "");
-    
-    pathData.writeln('case_' + numOutput + ' ' + x1 + ' ' + y1 + ' ' + x2 + ' ' + y2); 
-    
-    
-    
+
+    //fichier txt DATA
+    var pathData = new File(pathPage + "P" + pageIn + "_data.txt");
+    pathData.open("w");
+
+    //Export des cases JPG et DATA
+    var i = dataLayer.artLayers.length-1;
+    var numOutput = 1 ;     //dataLayer.artLayers[i].name.split(' ').pop(); //numero de case
+
+    for(i ; i >= 0 ; i--) {
+        
+        var history = document.activeHistoryState; //Historique off
+            
+        var boundsOutput = dataLayer.artLayers[i].bounds; //bound de la case
+                
+        document.crop (boundsOutput);
+        
+        var numCase = String(numOutput).padStart(3, "0");
+        var pathCase = pathCases + "C" + numCase + "/";
+        var pathCaseFolder = new Folder (pathCase);
+        if(!pathCaseFolder.exists) {
+            pathCaseFolder.create();
+        }
+        
+        var jpgOutput = new File(pathCase + "C" +numCase + ".jpg");
+        document.saveAs (jpgOutput, JPEGSaveOptions, true);
+         
+        x1 = String(boundsOutput[0]).replace (" px", "");
+        y1 = String(boundsOutput[1]).replace (" px", "");
+        x2 = String(boundsOutput[2]).replace (" px", "");
+        y2 = String(boundsOutput[3]).replace (" px", "");
+        
+        pathData.writeln('case_' + numOutput + ' ' + x1 + ' ' + y1 + ' ' + x2 + ' ' + y2); 
+        
+        
+        
+        document.activeHistoryState = history; //Historique on   
+        numOutput++;
+    };
+
+    pathData.close(); //txt close
+
+    //save doc PSD version et JPG
+    var pathPsd = new File(pathRough + "P" + pageIn + ".psd");
+
+    document.saveAs (pathPsd, PhotoshopSaveOptions, false);
+
+    //JPG tumb
+    var history = document.activeHistoryState; //Historique off
+    var pathTumb= new File(pathRough + "P" + pageIn + ".jpg");
+    // ajouter un resize 
+    document.saveAs (pathTumb, JPEGSaveOptions, true);
     document.activeHistoryState = history; //Historique on   
-    numOutput++;
 };
-
-pathData.close(); //txt close
-
-//save doc PSD version et JPG
-var pathPsd = new File(pathRough + "P" + pageIn + ".psd");
-
-document.saveAs (pathPsd, PhotoshopSaveOptions, false);
-
-//JPG tumb
-var history = document.activeHistoryState; //Historique off
-var pathTumb= new File(pathRough + "P" + pageIn + ".jpg");
-// ajouter un resize 
-document.saveAs (pathTumb, JPEGSaveOptions, true);
-document.activeHistoryState = history; //Historique on   
-
+exportRect();
