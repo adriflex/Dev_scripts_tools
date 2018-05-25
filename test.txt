@@ -1,1 +1,4 @@
+<<<<<<< HEAD
 test2 aaa
+=======
+>>>>>>> parent of 3417f3a... add text
