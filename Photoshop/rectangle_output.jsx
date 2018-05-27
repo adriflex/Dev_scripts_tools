@@ -1,4 +1,5 @@
 ﻿#target photoshop
+#include json2.js
 document = app.activeDocument;
 
 //repeat function
@@ -107,10 +108,12 @@ function exportRect() {
     if(!pathCasesFolder.exists) {
         pathCasesFolder.create();
     }
-
-    //fichier txt DATA
-    var pathData = new File(pathPage + "P" + pageIn + "_data.txt");
-    pathData.open("w");
+    
+    // Objet data pour JSON
+    var pageData = {
+        pageSize : [document.height.value, document.width.value],
+        cases : []
+    };
 
     //Export des cases JPG et DATA
     var i = dataLayer.artLayers.length-1;
@@ -134,20 +137,26 @@ function exportRect() {
         var jpgOutput = new File(pathCase + "C" +numCase + ".jpg");
         document.saveAs (jpgOutput, JPEGSaveOptions, true);
          
-        x1 = String(boundsOutput[0]).replace (" px", "");
-        y1 = String(boundsOutput[1]).replace (" px", "");
-        x2 = String(boundsOutput[2]).replace (" px", "");
-        y2 = String(boundsOutput[3]).replace (" px", "");
+        x1 = boundsOutput[0].value;
+        y1 = boundsOutput[1].value;
+        x2 = boundsOutput[2].value;
+        y2 = boundsOutput[3].value;
         
-        pathData.writeln('case_' + numOutput + ' ' + x1 + ' ' + y1 + ' ' + x2 + ' ' + y2); 
-        
-        
+        //data object fill
+        pageData.cases.push({"num" : numOutput, size : [x1, y1, x2, y2]});
         
         document.activeHistoryState = history; //Historique on   
         numOutput++;
     };
 
-    pathData.close(); //txt close
+    //JSON stringify
+    var jsonObject = JSON.stringify(pageData, null, 2);
+    
+    //Fichier JSON Data
+    var pathData = new File(pathPage + "P" + pageIn + "_data.json");
+    pathData.open("w");
+    pathData.write(jsonObject)
+    pathData.close(); //file close
 
     //save doc PSD version et JPG
     var pathPsd = new File(pathRough + "P" + pageIn + ".psd");
