@@ -1,4 +1,6 @@
 ﻿#target photoshop
+#include json2.js
+
 document = app.activeDocument;
 var pathGlobal = "/d/BD/";
 
@@ -31,13 +33,15 @@ if (!rendusCasesPathFolder.exists){
 
 
 //Boucle pour ouvrir et afficher les images
-var dataInPath =  pathGlobal + projectName + "/P" + pageNumber + "P/P" + pageNumber + "_data.txt";
+var dataInPath =  pathGlobal + projectName + "/P" + pageNumber + "P/P" + pageNumber + "_data.json";
 var dataInPathFile = new File(dataInPath);
-dataInPathFile.open('r'); // r = read w = write
-var str = "";
-while (!dataInPathFile.eof)  
-str += dataInPathFile.readln(); // debut;
+dataInPathFile.open('r'); // r = read w = write 
+var jsonInput = dataInPathFile.read();
 
+
+var jsonObject = JSON.parse(jsonInput);
+alert(String(jsonObject.cases[2].size[2]));
+dataInPathFile.close();
 
 var caseNewFile = new File(rendusCasesPath + "C" + numCase + "/C" + numCase + ".jpg")
 var caseNewFileDocument = open(caseNewFile)
