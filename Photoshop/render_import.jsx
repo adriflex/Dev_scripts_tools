@@ -1,4 +1,5 @@
-﻿#include json2.js
+﻿#target photoshop
+#include json2.js
 #include custom_script.js
 
 document = app.activeDocument;
@@ -72,7 +73,7 @@ function importRendus() {
             
         document.selection.select (newRect, SelectionType.REPLACE, 0, 0);
         document.paste(true);
-        document.activeLayer.name = "Rendu_" + numCase;
+        document.activeLayer.name = "Rendu_" + numCase;        
     };
 };
 
